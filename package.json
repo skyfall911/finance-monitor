@@ -1,0 +1,25 @@
+{
+  "name": "finance-monitor",
+  "version": "1.0.0",
+  "description": "财经信息监控与股票池管理",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "keywords": ["openclaw", "finance", "stock", "feishu"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "node-schedule": "^2.1.1",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/node-schedule": "^2.1.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
