@@ -438,19 +438,22 @@ export class StockPoolManager {
 
   async searchStocks(keyword: string): Promise<any[]> {
     try {
-      const response = await axios.get(`https://searchapi.eastmoney.com/api/suggest/get?input=${encodeURIComponent(keyword)}&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=10`, {
+      const response = await axios.get(`https://searchapi.eastmoney.com/api/suggest/get?input=${encodeURIComponent(keyword)}&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=20`, {
         timeout: 5000,
       });
 
       if (response.data?.QuotationCodeTable?.Data) {
-        return response.data.QuotationCodeTable.Data.map((item: any) => ({
-          code: item.Code,
-          name: item.Name,
-          industry: item.Industry || '未知',
-          board: item.Board || '未知',
-          marketCap: item.MarketCap || 0,
-          mainBusiness: item.MainBusiness || '未知',
-        }));
+        return response.data.QuotationCodeTable.Data
+          .filter((item: any) => item.Classify === 'AStock')
+          .slice(0, 10)
+          .map((item: any) => ({
+            code: item.Code,
+            name: item.Name,
+            industry: item.Industry || '未知',
+            board: item.Board || '未知',
+            marketCap: item.MarketCap || 0,
+            mainBusiness: item.MainBusiness || '未知',
+          }));
       }
     } catch (error) {
       console.error('搜索股票失败:', error);
