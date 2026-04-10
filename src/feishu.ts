@@ -26,22 +26,38 @@ export class FeishuClient {
       return this.tenantAccessToken;
     }
 
-    try {
-      const response = await this.http.post('/auth/v3/tenant_access_token/internal', {
-        app_id: this.appId,
-        app_secret: this.appSecret,
-      });
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-      if (response.data.code === 0) {
-        this.tenantAccessToken = response.data.tenant_access_token;
-        this.tokenExpireTime = Date.now() + (response.data.expire - 60) * 1000;
-        return this.tenantAccessToken;
-      } else {
-        throw new Error(`获取 tenant_access_token 失败: ${response.data.msg}`);
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          await this.delay(1000 * (attempt + 1));
+        }
+
+        const response = await this.http.post('/auth/v3/tenant_access_token/internal', {
+          app_id: this.appId,
+          app_secret: this.appSecret,
+        });
+
+        if (response.data.code === 0) {
+          this.tenantAccessToken = response.data.tenant_access_token;
+          this.tokenExpireTime = Date.now() + (response.data.expire - 60) * 1000;
+          console.log('✅ 飞书 API Token 获取成功');
+          return this.tenantAccessToken;
+        } else {
+          lastError = new Error(`获取 tenant_access_token 失败: ${response.data.msg}`);
+          if (response.data.msg?.includes('invalid')) {
+            console.log(`⚠️ Token 获取失败 (尝试 ${attempt + 1}/${maxRetries}): ${response.data.msg}`);
+          }
+        }
+      } catch (error: any) {
+        lastError = error;
+        console.log(`⚠️ Token 获取异常 (尝试 ${attempt + 1}/${maxRetries}): ${error.message}`);
       }
-    } catch (error: any) {
-      throw new Error(`获取 tenant_access_token 异常: ${error.message}`);
     }
+
+    throw lastError || new Error('获取 tenant_access_token 失败');
   }
 
   private async request(method: string, path: string, data?: any, retryCount = 0): Promise<any> {
