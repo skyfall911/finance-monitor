@@ -56,11 +56,16 @@ export class StockPoolManager {
     try {
       if (fs.existsSync(filePath)) {
         const data = fs.readFileSync(filePath, 'utf-8');
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (parsed.stocks && Array.isArray(parsed.stocks)) {
+          console.log(`✅ 成功加载股票池数据: ${parsed.stocks.length} 支股票`);
+          return parsed;
+        }
       }
     } catch (error) {
-      console.error('加载股票池数据失败:', error);
+      console.error('⚠️ 加载股票池数据失败:', error);
     }
+    console.log('📝 使用空白股票池');
     return { stocks: [], lastEvaluationDate: '', totalCount: 0 };
   }
 
