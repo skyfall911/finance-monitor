@@ -10,16 +10,16 @@ import { NewsCrawler } from './dist/news.js';
 import { StockPoolManager } from './dist/stockPool.js';
 import { FinanceScheduler } from './dist/scheduler.js';
 
-dotenv.config({ path: path.join(__dirname, 'skills/finance-monitor', '.env') });
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const CONFIG = {
   FEISHU: {
     APP_ID: process.env.FEISHU_APP_ID || '',
     APP_SECRET: process.env.FEISHU_APP_SECRET || '',
   },
-  USER_OPEN_ID: 'ou_ad70c7a42c69dec8464bb84eb114b0df',
+  USER_OPEN_ID: process.env.FEISHU_USER_OPEN_ID || 'ou_ad70c7a42c69dec8464bb84eb114b0df',
   CHAT_ID: process.env.FEISHU_CHAT_ID || 'oc_04c5349b1fe02f96c7e144a2999e8309',
-  DATA_ROOT: '/Users/ray/.openclaw/workspace-cia/skills/finance-monitor/data',
+  DATA_ROOT: process.env.DATA_ROOT || '/Users/ray/.openclaw/workspace-cia/skills/finance-monitor/data',
   STOCK_POOL_MAX: 200,
   DAILY_NEWS_COUNT: 20,
 };
@@ -44,6 +44,10 @@ async function main() {
   console.log('执行每日财经抓取任务...');
   await scheduler.runDailyNewsCollection();
   console.log('任务执行完成');
+  process.exit(0);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error('执行失败:', err);
+  process.exit(1);
+});
